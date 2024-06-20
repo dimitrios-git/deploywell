@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Edit Ansible Vault",
+      "type": "shell",
+      "command": "ansible-vault edit --vault-password-file ansible_ssh_key.pub ${file}",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Encrypt Ansible Vault",
+      "type": "shell",
+      "command": "ansible-vault encrypt --vault-password-file ansible_ssh_key.pub ${file}",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Decrypt Ansible Vault",
+      "type": "shell",
+      "command": "ansible-vault decrypt --vault-password-file ansible_ssh_key.pub ${file}",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate inventory.ini.example",
+      "type": "shell",
+      "command": "python inventory.ini.example_generator.py",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "dependsOn": []
+    }
+  ]
+}
