@@ -1,4 +1,5 @@
 ---
+# defaults file for nginx_proxy
 nginx_proxy_configs:
   - server_name: app1.example.com
     upstream: 127.0.0.1:8001

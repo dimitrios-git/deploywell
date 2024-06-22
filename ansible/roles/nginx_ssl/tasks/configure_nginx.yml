@@ -1,6 +1,5 @@
 ---
 # tasks file for nginx_ssl
-
 - name: Ensure SSL configuration directory exists for {{ item }}
   ansible.builtin.file:
     path: "/etc/nginx/ssl/{{ item }}"

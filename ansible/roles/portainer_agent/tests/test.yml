@@ -1,5 +1,6 @@
 ---
-- name: Portainer Agent Setup
+# tests file for portainer_agent role
+- name: Portainer Agent Setup - TEST
   hosts: all
   become: true
   roles:

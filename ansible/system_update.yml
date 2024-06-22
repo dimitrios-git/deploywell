@@ -1,7 +1,7 @@
 # Description: This playbook updates the system packages and removes leaf packages.
 # Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff system_update.yml --limiit=<host>
 # Author: Dimitrios Chralampidis (dimitrios@charalampidis.pro)
-# Compatibility:
+# Tested on:
 #   - Debian 12
 #   - Ubuntu 24.04 LTS
 #   - Fedora 40

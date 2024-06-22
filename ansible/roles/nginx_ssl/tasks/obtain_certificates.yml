@@ -1,3 +1,5 @@
+---
+# tasks file for nginx_ssl
 - name: Ensure temporary directory exists for Certbot
   ansible.builtin.file:
     path: /tmp/certbot
@@ -10,7 +12,7 @@
     state: stopped
 
 - name: Obtain SSL certificates with Certbot using standalone
-  ansible.builtin.shell: >
+  ansible.builtin.command: >
     certbot certonly
     -d {{ item }}
     --email {{ nginx_ssl_email }}
@@ -41,14 +43,11 @@
   loop: "{{ nginx_ssl_domains }}"
 
 - name: Find latest certificate directory
-  ansible.builtin.shell: >
-    if ls -td /etc/letsencrypt/live/{{ item }}*-*/ >/dev/null 2>&1; then
-        ls -td /etc/letsencrypt/live/{{ item }}*-*/ | head -n 1
-    else
-        ls -td /etc/letsencrypt/live/{{ item }}/ | head -n 1
-    fi
+  ansible.builtin.command: >
+    sh -c 'ls -td /etc/letsencrypt/live/{{ item }}*-*/ /etc/letsencrypt/live/{{ item }}/ 2>/dev/null | head -n 1'
   register: latest_cert_directory
   loop: "{{ nginx_ssl_domains }}"
+  changed_when: false
 
 - name: Debug latest certificate directory
   ansible.builtin.debug:

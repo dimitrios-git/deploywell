@@ -1,4 +1,5 @@
 ---
+# tasks file for nginx_proxy
 - name: Ensure SSL configuration directory exists for {{ item.server_name }}
   ansible.builtin.file:
     path: "/etc/nginx/ssl/{{ item.server_name }}"
