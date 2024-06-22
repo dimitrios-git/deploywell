@@ -8,7 +8,6 @@
   ansible.builtin.service:
     name: nginx
     state: stopped
-  become: true
 
 - name: Obtain SSL certificates with Certbot using standalone
   ansible.builtin.shell: >
@@ -23,14 +22,16 @@
   args:
     creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
   register: certbot_results
-  become: true
   loop: "{{ nginx_ssl_domains }}"
+
+- name: Debug Certbot results
+  ansible.builtin.debug:
+    var: certbot_results
 
 - name: Start Nginx
   ansible.builtin.service:
     name: nginx
     state: started
-  become: true
 
 - name: Ensure SSL destination directories exist
   ansible.builtin.file:
@@ -38,7 +39,6 @@
     state: directory
     mode: "0755"
   loop: "{{ nginx_ssl_domains }}"
-  become: true
 
 - name: Find latest certificate directory
   ansible.builtin.shell: >
@@ -49,12 +49,10 @@
     fi
   register: latest_cert_directory
   loop: "{{ nginx_ssl_domains }}"
-  become: true
 
 - name: Debug latest certificate directory
   ansible.builtin.debug:
     msg: "{{ latest_cert_directory }}"
-  become: true
 
 - name: Copy SSL fullchain keys to Nginx configuration directory
   ansible.builtin.copy:
@@ -65,7 +63,6 @@
   loop: "{{ latest_cert_directory.results }}"
   loop_control:
     loop_var: item
-  become: true
   failed_when: item.rc != 0
 
 - name: Copy SSL private keys to Nginx configuration directory
@@ -77,5 +74,4 @@
   loop: "{{ latest_cert_directory.results }}"
   loop_control:
     loop_var: item
-  become: true
   failed_when: item.rc != 0

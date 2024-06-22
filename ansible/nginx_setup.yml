@@ -1,7 +1,7 @@
 # Description: This playbook sets up Nginx with SSL and reverse proxy.
 # Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff nginx_setup.yml --limiit=<host>
 # Author: Dimitrios Chralampidis (dimitrios@charalampidis.pro)
-# Compatibility:
+# Tested on:
 #   - Debian 12
 #   - Ubuntu 24.04 LTS
 #   - Fedora 40
@@ -17,29 +17,15 @@
     nginx_proxy_configs:
       - server_name: app1.snail-trading.com
         upstream: 127.0.0.1:8081
-        ssl_enabled: true
+        ssl_enabled: false
       - server_name: app2.snail-trading.com
         upstream: 127.0.0.1:8082
         ssl_enabled: true
 
-    nginx_ssl_domains:
-      - app1.snail-trading.com
-      - app2.snail-trading.com
-
+    nginx_ssl_domains: "{{ nginx_proxy_configs | selectattr('ssl_enabled', 'eq', true) | map(attribute='server_name') | list }}"
     nginx_ssl_email: dimitrios@charalampidis.pro
-    nginx_ssl_backend_ports:
-      - 8081
-      - 8082
 
   tasks:
-    - name: Debug initial variables
-      ansible.builtin.debug:
-        msg: "nginx_ssl_domains before roles: {{ nginx_ssl_domains }}"
-
-    - name: Set fact to include SSL role
-      ansible.builtin.set_fact:
-        include_ssl: "{{ nginx_proxy_configs | selectattr('ssl_enabled', 'eq', true) | list | length > 0 }}"
-
     - name: Include nginx role
       ansible.builtin.include_role:
         name: nginx
@@ -51,8 +37,4 @@
     - name: Include nginx_ssl role
       ansible.builtin.include_role:
         name: nginx_ssl
-      when: include_ssl
-
-    - name: Debug final variables
-      ansible.builtin.debug:
-        msg: "nginx_ssl_domains after roles: {{ nginx_ssl_domains }}"
+      when: nginx_ssl_domains | length > 0

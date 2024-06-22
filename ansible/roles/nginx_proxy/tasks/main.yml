@@ -1,4 +1,3 @@
----
 - name: Ensure Nginx configuration directory exists
   ansible.builtin.file:
     path: /etc/nginx/conf.d

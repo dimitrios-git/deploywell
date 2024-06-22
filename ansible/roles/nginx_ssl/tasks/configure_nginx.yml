@@ -1,4 +1,7 @@
-- name: Ensure SSL configuration directory exists
+---
+# tasks file for nginx_ssl
+
+- name: Ensure SSL configuration directory exists for {{ item }}
   ansible.builtin.file:
     path: "/etc/nginx/ssl/{{ item }}"
     state: directory
@@ -7,20 +10,23 @@
     mode: "0755"
   loop: "{{ nginx_ssl_domains }}"
 
-- name: Template HTTPS server block configuration
+- name: Template HTTPS server block configuration for {{ item.server_name }}
   ansible.builtin.template:
-    src: "nginx_ssl_conf.j2"
-    dest: "/etc/nginx/sites-available/{{ item }}"
+    src: nginx_proxy_ssl_conf.j2
+    dest: "/etc/nginx/sites-available/{{ item.server_name }}"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ nginx_ssl_domains }}"
-  notify: Restart Nginx
+  loop: "{{ nginx_proxy_configs }}"
+  when: item.server_name in nginx_ssl_domains
+  notify:
+    - Restart Nginx
 
-- name: Enable Nginx SSL site
+- name: Enable Nginx SSL site for {{ item.server_name }}
   ansible.builtin.file:
-    src: "/etc/nginx/sites-available/{{ item }}"
-    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    src: "/etc/nginx/sites-available/{{ item.server_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ item.server_name }}"
     state: link
-  loop: "{{ nginx_ssl_domains }}"
+  loop: "{{ nginx_proxy_configs }}"
+  when: item.server_name in nginx_ssl_domains
   notify: Restart Nginx
