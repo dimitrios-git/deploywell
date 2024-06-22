@@ -1,0 +1,168 @@
+---
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == 'Debian'
+
+- name: Install Docker dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ca-certificates
+    - curl
+  when: ansible_os_family == 'Debian'
+
+- name: Set Docker repository URL for Debian and Ubuntu
+  ansible.builtin.set_fact:
+    docker_repo_url: >-
+      deb [arch=amd64] https://download.docker.com/linux/{{ 'ubuntu' if ansible_distribution == 'Ubuntu' else 'debian' }}
+      {{ ansible_distribution_release }} stable
+  when: ansible_os_family == 'Debian'
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/{{ 'ubuntu' if ansible_distribution == 'Ubuntu' else 'debian' }}/gpg
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "{{ docker_repo_url }}"
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+  when: ansible_os_family == 'Debian'
+
+- name: Create Docker daemon configuration directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  when: ansible_os_family == 'Debian'
+
+- name: Configure Docker daemon
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    mode: "0644"
+    owner: root
+    group: root
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure Docker is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure dnf cache is updated
+  ansible.builtin.dnf:
+    update_cache: true
+  when: ansible_distribution == 'Fedora'
+
+- name: Install Docker dependencies
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - dnf-plugins-core
+  when: ansible_distribution == 'Fedora'
+
+- name: Add Docker repository GPG key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/fedora/gpg
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-docker
+    mode: "0444"
+  when: ansible_distribution == 'Fedora'
+
+- name: Add Docker repository
+  ansible.builtin.command:
+    cmd: "dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: ansible_distribution == 'Fedora'
+
+- name: Install Docker
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+  when: ansible_distribution == 'Fedora'
+
+- name: Create Docker daemon configuration directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  when: ansible_distribution == 'Fedora'
+
+- name: Configure Docker daemon
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    mode: "0644"
+    owner: root
+    group: root
+  when: ansible_distribution == 'Fedora'
+
+- name: Ensure Docker is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: ansible_distribution == 'Fedora'
+
+- name: Install yum-utils package # noqa fqcn
+  yum:
+    name: yum-utils
+    state: present
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]
+
+- name: Add Docker repository # noqa fqcn
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]
+
+- name: Import Docker GPG key # noqa fqcn
+  rpm_key:
+    state: present
+    key: https://download.docker.com/linux/centos/gpg
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]
+
+- name: Install Docker Engine, containerd, and Docker Compose plugins # noqa fqcn
+  yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]
+
+- name: Start and enable Docker service # noqa fqcn
+  service:
+    name: docker
+    state: started
+    enabled: true
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]

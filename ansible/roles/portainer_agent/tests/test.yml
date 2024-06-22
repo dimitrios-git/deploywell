@@ -1,0 +1,6 @@
+---
+- name: Portainer Agent Setup
+  hosts: all
+  become: true
+  roles:
+    - portainer_agent

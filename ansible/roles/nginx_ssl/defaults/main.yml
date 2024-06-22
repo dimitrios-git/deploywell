@@ -1,0 +1,4 @@
+---
+# defaults file for nginx_ssl
+nginx_ssl_domains: []
+nginx_ssl_email: ""

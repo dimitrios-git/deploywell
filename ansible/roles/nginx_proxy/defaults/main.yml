@@ -1,0 +1,7 @@
+---
+nginx_proxy_configs:
+  - server_name: app1.example.com
+    upstream: 127.0.0.1:8001
+
+  - server_name: app2.example.com
+    upstream: 127.0.0.1:8002

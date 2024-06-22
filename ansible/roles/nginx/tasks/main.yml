@@ -1,0 +1,12 @@
+---
+- name: Install Nginx package
+  ansible.builtin.package:
+    name: nginx
+    state: present
+    update_cache: true # Update cache to ensure latest version is installed
+
+- name: Ensure Nginx service is started and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

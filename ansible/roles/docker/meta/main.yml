@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Dimitrios Charalampidis
+  description: Install Docker on Ubuntu, Debian, Fedora, CentOS, Rocky Linux, AlmaLinux
+  company: None
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
+    - name: Fedora
+      versions:
+        - all
+    - name: EL
+      versions:
+        - all
+
+  standalone: true
+
+dependencies: []

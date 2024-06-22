@@ -1,0 +1,26 @@
+- name: Ensure SSL configuration directory exists
+  ansible.builtin.file:
+    path: "/etc/nginx/ssl/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ nginx_ssl_domains }}"
+
+- name: Template HTTPS server block configuration
+  ansible.builtin.template:
+    src: "nginx_ssl_conf.j2"
+    dest: "/etc/nginx/sites-available/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ nginx_ssl_domains }}"
+  notify: Restart Nginx
+
+- name: Enable Nginx SSL site
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    state: link
+  loop: "{{ nginx_ssl_domains }}"
+  notify: Restart Nginx

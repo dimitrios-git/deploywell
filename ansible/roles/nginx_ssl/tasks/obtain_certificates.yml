@@ -1,0 +1,81 @@
+- name: Ensure temporary directory exists for Certbot
+  ansible.builtin.file:
+    path: /tmp/certbot
+    state: directory
+    mode: "0755"
+
+- name: Stop Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: stopped
+  become: true
+
+- name: Obtain SSL certificates with Certbot using standalone
+  ansible.builtin.shell: >
+    certbot certonly
+    -d {{ item }}
+    --email {{ nginx_ssl_email }}
+    --agree-tos
+    --non-interactive
+    --standalone
+  environment:
+    PATH: "{{ ansible_env.PATH }}"
+  args:
+    creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
+  register: certbot_results
+  become: true
+  loop: "{{ nginx_ssl_domains }}"
+
+- name: Start Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+  become: true
+
+- name: Ensure SSL destination directories exist
+  ansible.builtin.file:
+    path: "/etc/nginx/ssl/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ nginx_ssl_domains }}"
+  become: true
+
+- name: Find latest certificate directory
+  ansible.builtin.shell: >
+    if ls -td /etc/letsencrypt/live/{{ item }}*-*/ >/dev/null 2>&1; then
+        ls -td /etc/letsencrypt/live/{{ item }}*-*/ | head -n 1
+    else
+        ls -td /etc/letsencrypt/live/{{ item }}/ | head -n 1
+    fi
+  register: latest_cert_directory
+  loop: "{{ nginx_ssl_domains }}"
+  become: true
+
+- name: Debug latest certificate directory
+  ansible.builtin.debug:
+    msg: "{{ latest_cert_directory }}"
+  become: true
+
+- name: Copy SSL fullchain keys to Nginx configuration directory
+  ansible.builtin.copy:
+    src: "{{ item.stdout }}/fullchain.pem"
+    dest: "/etc/nginx/ssl/{{ item.item }}/fullchain.pem"
+    mode: "0644"
+    remote_src: true
+  loop: "{{ latest_cert_directory.results }}"
+  loop_control:
+    loop_var: item
+  become: true
+  failed_when: item.rc != 0
+
+- name: Copy SSL private keys to Nginx configuration directory
+  ansible.builtin.copy:
+    src: "{{ item.stdout }}/privkey.pem"
+    dest: "/etc/nginx/ssl/{{ item.item }}/privkey.pem"
+    mode: "0600"
+    remote_src: true
+  loop: "{{ latest_cert_directory.results }}"
+  loop_control:
+    loop_var: item
+  become: true
+  failed_when: item.rc != 0

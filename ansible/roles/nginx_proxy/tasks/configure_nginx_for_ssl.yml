@@ -1,0 +1,16 @@
+---
+- name: Ensure SSL configuration directory exists for {{ item.server_name }}
+  ansible.builtin.file:
+    path: "/etc/nginx/ssl/{{ item.server_name }}"
+    state: directory
+    mode: "0755"
+
+- name: Template HTTPS server block configuration for {{ item.server_name }}
+  ansible.builtin.template:
+    src: nginx_proxy_ssl_conf.j2
+    dest: "/etc/nginx/sites-available/{{ item.server_name }}"
+    mode: "0644"
+  notify:
+    - Reload Nginx
+  with_items: "{{ nginx_proxy_configs }}"
+  when: item.ssl_enabled | default(false)
