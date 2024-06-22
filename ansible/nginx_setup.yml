@@ -3,6 +3,7 @@
 # Author: Dimitrios Chralampidis (dimitrios@charalampidis.pro)
 # Tested on:
 #   - Ubuntu 24.04 LTS
+#   - Debian 12
 ---
 - name: Nginx Setup
   hosts: all
