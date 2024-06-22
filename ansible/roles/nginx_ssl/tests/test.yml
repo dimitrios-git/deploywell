@@ -1,6 +1,9 @@
 # This test is not tested. Likely you will needed a proper domain and a DNS record to test this role.
 # Additionally, your test machine should be accessible from the internet.
 # I have configured a Vagrantfile to test this role. But I need to test it.
+# Test with the following command:
+# cd roles/nginx_ssl/tests
+# ANSIBLE_ROLES_PATH=../../ ansible-playbook -i inventory test.yml -u dimitrios --ask_become_pass
 ---
 # test file for nginx_ssl role
 - name: Nginx SSL Role (TEST)
