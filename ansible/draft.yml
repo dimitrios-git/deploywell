@@ -1,0 +1,7 @@
+---
+# run the following playbooks, portainer_agent_setup.yml and nginx_setup.yml
+- name: Import Portainer Agent Setup
+  import_playbook: ./portainer_agent_setup.yml
+
+- name: Import Nginx Setup
+  import_playbook: ./nginx_setup.yml

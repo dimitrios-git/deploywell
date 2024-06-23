@@ -1,5 +1,11 @@
 ---
 # additional tasks for installing certbot
+- name: Install EPEL repository # noqa fqcn
+  ansible.builtin.yum:
+    name: epel-release
+    state: present
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]
+
 - name: Install Certbot
   ansible.builtin.package:
     name: certbot

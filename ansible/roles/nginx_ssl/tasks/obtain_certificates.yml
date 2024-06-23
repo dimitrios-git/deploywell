@@ -12,6 +12,7 @@
     state: stopped
 
 - name: Obtain SSL certificates with Certbot using standalone
+  # --staging is used for testing purposes, remove it for production
   ansible.builtin.command: >
     certbot certonly
     -d {{ item }}
@@ -19,6 +20,7 @@
     --agree-tos
     --non-interactive
     --standalone
+    --staging
   environment:
     PATH: "{{ ansible_env.PATH }}"
   args:
