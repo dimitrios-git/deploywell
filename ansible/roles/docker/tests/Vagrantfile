@@ -1,0 +1,28 @@
+# Vagrantfile
+
+Vagrant.configure("2") do |config|
+  vagrant_root = File.dirname(__FILE__)
+  ENV['ANSIBLE_ROLES_PATH'] = "#{vagrant_root}/../../"
+
+  config.vm.box = "ubuntu/jammy64"  # Choose your desired box/version
+  # https://app.vagrantup.com/boxes/search
+
+  config.vm.network "public_network", bridge: "enp5s0" # Choose your desired network interface
+  config.vm.network "private_network", ip: "192.168.56.100" # Choose your desired IP address and make sure it matches the inventory file
+
+  config.ssh.insert_key = false
+  config.ssh.private_key_path = ['~/.vagrant.d/insecure_private_key', '../../../ansible_ssh_key']
+  config.vm.provision "file", source: "../../../ansible_ssh_key.pub", destination: "/home/vagrant/.ssh/authorized_keys"
+  
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024"  # Customize VM memory size if needed
+  end
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.compatibility_mode = "2.0"
+    ansible.playbook = "test.yml"
+    ansible.inventory_path = "inventory"
+    ansible.limit = "vagrant"
+    ansible.verbose = "vvv"
+  end
+end

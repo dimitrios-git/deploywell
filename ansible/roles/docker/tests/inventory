@@ -1,2 +1,6 @@
-[all]
-localhost ansible_connection=local
+[vagrant]
+192.168.56.100
+
+[vagrant:vars]
+ansible_user=vagrant
+ansible_ssh_private_key_file=../../../ansible_ssh_key

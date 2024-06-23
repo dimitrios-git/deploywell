@@ -1,0 +1,26 @@
+# I have configured a Vagrantfile to test this role..
+#
+# Create the VM with the following command in the same directory as the Vagrantfile:
+# vagrant up
+#
+# This should create a VM and run the test playbook.
+# If successfully run, you can run the following command to log into the VM:
+# vagrant ssh
+#
+# Then run the following command to see the version of Docker installed:
+# docker --version
+#
+# If you run into any issues, adjust the network device and the IP address in the Vagrantfile and the inventory file.
+#
+# While the VM is running, you can run the playbook with the following command in the same directory as the Vagrantfile:
+# ANSIBLE_ROLES_PATH=../../ ansible-playbook -i inventory test.yml
+#
+# When you are done, you can run the following command to destroy the VM:
+# vagrant destroy
+---
+# tests file for docker
+- name: Set up Docker
+  hosts: vagrant
+  become: true
+  roles:
+    - docker
