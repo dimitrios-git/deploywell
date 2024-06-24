@@ -20,20 +20,20 @@
   when:
     - ansible_distribution in ['Debian', 'Ubuntu']
     - firewall_allowed_ports is defined and firewall_allowed_ports | length > 0
-  notify: Reload UFW
+  notify: Reload UFW (for Debian, Ubuntu)
 
 - name: Enable UFW (for Debian, Ubuntu)
   community.general.ufw:
     state: enabled
   when: ansible_distribution in ['Debian', 'Ubuntu']
-  notify: Reload UFW
+  notify: Reload UFW (for Debian, Ubuntu)
 
 - name: Deny all other incoming connections through UFW (for Debian, Ubuntu)
   community.general.ufw:
     default: deny
     direction: incoming
   when: ansible_distribution in ['Debian', 'Ubuntu']
-  notify: Reload UFW
+  notify: Reload UFW (for Debian, Ubuntu)
 
 - name: Start and enable UFW service (for Debian, Ubuntu)
   ansible.builtin.service:
@@ -85,7 +85,7 @@
   when:
     - ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
     - firewall_allowed_ports is defined and firewall_allowed_ports | length > 0
-  notify: Reload firewalld
+  notify: Reload firewalld (for Fedora, CentOS, Rocky Linux, AlmaLinux)
 
 - name: Deny all other incoming connections through firewalld (for Fedora, CentOS, Rocky Linux, AlmaLinux)
   ansible.posix.firewalld:
@@ -95,7 +95,7 @@
     state: disabled
     immediate: true
   when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
-  notify: Reload firewalld
+  notify: Reload firewalld (for Fedora, CentOS, Rocky Linux, AlmaLinux)
 
 - name: Reload firewalld to apply changes (for Fedora, CentOS, Rocky Linux, AlmaLinux)
   ansible.posix.firewalld:
