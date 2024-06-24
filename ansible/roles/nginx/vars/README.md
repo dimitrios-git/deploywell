@@ -1,38 +1,47 @@
-Role Name
-=========
+# Role Name
 
-A brief description of the role goes here.
+## Nginx
 
-Requirements
-------------
+This role installs the Nginx web server on Debian-based systems and firewalld on RedHat-based systems.
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+### Tested on
 
-Role Variables
---------------
+- Debian 12
+- Ubuntu 24.04 LTS
+- Fedora 40
+- CentOS Stream 9
+- Rocky Linux 9
+- AlmaLinux 9
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+## Requirements
 
-Dependencies
-------------
+None.
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+## Role Variables
 
-Example Playbook
-----------------
+None.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Dependencies
 
-    - hosts: servers
+None.
+
+## Example Playbook
+
+Change `all` to your target host, or use `--limit=<your-target-host>`:
+
+    ---
+    - name: Set up Nginx
+      hosts: all
+      become: true
       roles:
-         - { role: username.rolename, x: 42 }
+        - role: nginx
 
-License
--------
+## License
 
-BSD
+MIT
 
-Author Information
-------------------
+## Author Information
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Dimitrios Charalampidis
+
+<dimitrios@charalampidis.pro> - signed with my [0xEB90A5A2D628F2A6](https://keys.openpgp.org/vks/v1/by-fingerprint/99DB5AFD449482F61D251384EB90A5A2D628F2A6)

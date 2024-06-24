@@ -11,7 +11,7 @@
   when: ansible_distribution in ['Fedora']
 
 - name: Ensure yum cache is updated
-  ansible.builtin.yum:
+  ansible.builtin.yum: # noqa fqcn package-latest
     name: "*"
     state: latest
   when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
