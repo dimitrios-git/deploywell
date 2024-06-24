@@ -31,7 +31,8 @@ In this example, we allow SSH, HTTP, and HTTPS traffic.
 Change `all` to your target host, or use `--limit=<your-target-host>`:
 
     ---
-    - hosts: all
+    - name: Set up firewall
+      hosts: all
       become: true
       roles:
         - role: firewall

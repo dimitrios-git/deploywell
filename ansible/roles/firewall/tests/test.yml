@@ -1,14 +1,15 @@
 ---
-# I have configured a Vagrantfile to test this role..
+# I have configured a Vagrantfile to test this role.
 #
 # Create the VM with the following command in the same directory as the Vagrantfile:
 # vagrant up
 #
 # This should create a VM and run the test playbook.
 # If successfully run, you can run the following command to log into the VM:
+#
 # vagrant ssh
 #
-# Then run the following command to see the version of Docker installed:
+# Then run the following command to see the status of UFW:
 # ufw status
 #
 # If you run into any issues, adjust the network device and the IP address in the Vagrantfile and the inventory file.
@@ -20,7 +21,7 @@
 # vagrant provision
 #
 # When you are done, you can run the following command to destroy the VM:
-# vagrant destroy
+# vagrant destroy -f
 #
 # tests file for firewall
 - name: Test Firewall Installation and Configuration on a Vagrant VM
