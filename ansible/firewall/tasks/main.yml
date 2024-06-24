@@ -1,0 +1,68 @@
+---
+# tasks file for firewall
+- name: Ensure UFW is installed
+  apt:
+    name: ufw
+    state: present
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Ensure firewalld is installed (Fedora/CentOS)
+  yum:
+    name: firewalld
+    state: present
+  when: ansible_distribution in ['Fedora', 'CentOS', Rocky', 'AlmaLinux']
+
+- name: Start and enable UFW
+  service:
+    name: ufw
+    state: started
+    enabled: true
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Start and enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: ansible_distribution in ['Fedora', 'CentOS', Rocky', 'AlmaLinux']
+
+- name: Allow SSH through UFW
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ firewall_allowed_ports }}"
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Deny all other incoming connections through UFW
+  ufw:
+    default: deny
+    direction: incoming
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Allow SSH through firewalld
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ firewall_allowed_ports }}"
+  when: ansible_distribution in ['Fedora', 'CentOS', Rocky', 'AlmaLinux']
+
+- name: Deny all other incoming connections through firewalld
+  firewalld:
+    default_zone: public
+    source: 0.0.0.0/0
+    permanent: true
+    state: disabled
+    immediate: true
+  when: ansible_distribution in ['Fedora', 'CentOS', Rocky', 'AlmaLinux']
+
+- name: Reload UFW to apply changes
+  command: ufw reload
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Reload firewalld to apply changes
+  firewalld:
+    state: reloaded
+  when: ansible_distribution in ['Fedora', 'CentOS', Rocky', 'AlmaLinux']

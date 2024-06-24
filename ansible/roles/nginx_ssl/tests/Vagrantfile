@@ -4,7 +4,17 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"  # Choose your desired box/version
   # https://app.vagrantup.com/boxes/search
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   config.vm.network "private_network", type: "dhcp"  # Configure networking
+=======
+#  config.vm.network "private_network", type: "dhcp"  # Configure networking
+  config.vm.network "private_network", ip: "172.30.1.5"
+>>>>>>> Stashed changes
+=======
+#  config.vm.network "private_network", type: "dhcp"  # Configure networking
+  config.vm.network "private_network", ip: "172.30.1.5"
+>>>>>>> Stashed changes
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "1024"  # Customize VM memory size if needed

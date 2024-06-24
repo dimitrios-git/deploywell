@@ -4,7 +4,15 @@
   ansible.builtin.package:
     name: nginx
     state: present
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     update_cache: true # Update cache to ensure latest version is installed
+=======
+    update_cache: true
+>>>>>>> Stashed changes
+=======
+    update_cache: true
+>>>>>>> Stashed changes
 
 - name: Ensure Nginx service is started and enabled
   ansible.builtin.service:
