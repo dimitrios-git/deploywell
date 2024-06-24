@@ -1,31 +1,12 @@
 ---
 # Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff nginx_setup.yml --limiit=<host>
-- name: Nginx Setup
+- name: Install Nginx and configure firewall for Nginx
   hosts: all
   become: true
-
-  vars:
-    nginx_proxy_configs:
-      - server_name: app1.snail-trading.com
-        upstream: 127.0.0.1:8081
-        ssl_enabled: false
-      - server_name: app2.snail-trading.com
-        upstream: 127.0.0.1:8082
-        ssl_enabled: true
-
-    nginx_ssl_domains: "{{ nginx_proxy_configs | selectattr('ssl_enabled', 'eq', true) | map(attribute='server_name') | list }}"
-    nginx_ssl_email: dimitrios@charalampidis.pro
-
-  tasks:
-    - name: Include nginx role
-      ansible.builtin.include_role:
-        name: nginx
-
-    - name: Include nginx_proxy role
-      ansible.builtin.include_role:
-        name: nginx_proxy
-
-    - name: Include nginx_ssl role
-      ansible.builtin.include_role:
-        name: nginx_ssl
-      when: nginx_ssl_domains | length > 0
+  roles:
+    - role: firewall
+      vars:
+        firewall_allowed_ports:
+          - 22 # Don't lock yourself out
+          - 80 # HTTP
+    - role: nginx
