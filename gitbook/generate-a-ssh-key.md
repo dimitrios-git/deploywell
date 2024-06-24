@@ -1,8 +1,10 @@
 ---
-description: Instructions to generate a key for authenticating to remote hosts.
+description: Your Guide to Generating a SSH Key
 ---
 
 # Generate a SSH Key
+
+Use the following command to generate a new SSH key in the project's directory:
 
 ```bash
 ssh-keygen -t rsa -b 4096 -C "ansible_ssh_key" -f ansible_ssh_key # Generate a set of keys
