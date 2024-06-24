@@ -1,2 +1,11 @@
 ---
 # handlers file for firewall
+- name: Reload UFW (for Debian, Ubuntu)
+  ansible.builtin.command: ufw reload
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+  changed_when: false
+
+- name: Reload firewalld (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.posix.firewalld:
+    state: enabled
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']

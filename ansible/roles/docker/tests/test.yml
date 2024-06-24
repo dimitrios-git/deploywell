@@ -1,3 +1,4 @@
+---
 # I have configured a Vagrantfile to test this role..
 #
 # Create the VM with the following command in the same directory as the Vagrantfile:
@@ -20,9 +21,9 @@
 #
 # When you are done, you can run the following command to destroy the VM:
 # vagrant destroy
----
+#
 # tests file for docker
-- name: Set up Docker
+- name: Test Setting up Docker
   hosts: vagrant
   become: true
   roles:

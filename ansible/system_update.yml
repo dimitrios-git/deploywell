@@ -1,14 +1,5 @@
-# Description: This playbook updates the system packages and removes leaf packages.
-# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff system_update.yml --limiit=<host>
-# Author: Dimitrios Chralampidis (dimitrios@charalampidis.pro)
-# Tested on:
-#   - Debian 12
-#   - Ubuntu 24.04 LTS
-#   - Fedora 40
-#   - CentOS Stream 9
-#   - Rocky Linux 9
-#   - AlmaLinux 9
 ---
+# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff system_update.yml --limiit=<host>
 - name: System Update
   hosts: all
   become: true
@@ -25,9 +16,9 @@
       when: ansible_distribution in ['Debian', 'Ubuntu']
 
     - name: Update dnf cache and upgrade all packages (for Fedora)
-      ansible.builtin.dnf: # noqa package-latest
+      ansible.builtin.dnf:
         name: "*"
-        state: latest
+        state: present
         update_cache: true
       when: ansible_distribution == 'Fedora'
 

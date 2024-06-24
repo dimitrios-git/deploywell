@@ -1,3 +1,4 @@
+---
 # I have configured a Vagrantfile to test this role..
 #
 # Create the VM with the following command in the same directory as the Vagrantfile:
@@ -20,8 +21,10 @@
 #
 # When you are done, you can run the following command to destroy the VM:
 # vagrant destroy
----
-- hosts: vagrant
+#
+# tests file for firewall
+- name: Test Firewall Installation and Configuration on a Vagrant VM
+  hosts: vagrant
   become: true
   roles:
     - role: firewall

@@ -1,21 +1,33 @@
-# Description: This playbook reboots the system.
-# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff system_reboot.yml --limiit=<host>
-# Author: Dimitrios Chralampidis (dimitrios@charalampidis.pro)
-# Tested on:
-#   - Debian 12
-#   - Ubuntu 24.04 LTS
-#   - Fedora 40
-#   - CentOS Stream 9
-#   - Rocky Linux 9
-#   - AlmaLinux 9
 ---
+# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff system_reboot.yml --limiit=<host>
 - name: System Reboot
   hosts: all
   become: true
   tasks:
+    - name: Check system uptime before reboot
+      ansible.builtin.command: uptime
+      register: pre_reboot_uptime
+      changed_when: false
+
+    - name: Display system uptime before reboot
+      ansible.builtin.debug:
+        msg: "System uptime before reboot: {{ pre_reboot_uptime.stdout }}"
+
     - name: Reboot the system
       ansible.builtin.reboot:
         msg: "Reboot initiated by Ansible"
         reboot_timeout: 600
         test_command: uptime
-        connect_timeout: 5
+        connect_timeout: 30
+        pre_reboot_delay: 10
+      environment:
+        ANSIBLE_SSH_RETRIES: "5" # Number of retries
+
+    - name: Check system uptime after reboot
+      ansible.builtin.command: uptime
+      register: post_reboot_uptime
+      changed_when: false
+
+    - name: Display system uptime after reboot
+      ansible.builtin.debug:
+        msg: "System uptime after reboot: {{ post_reboot_uptime.stdout }}"

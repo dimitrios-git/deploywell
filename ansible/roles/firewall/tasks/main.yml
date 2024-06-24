@@ -1,97 +1,103 @@
 ---
 # tasks file for firewall
-- name: Ensure apt cache is updated
+- name: Ensure apt cache is updated (for Debian, Ubuntu)
   ansible.builtin.apt:
     update_cache: true
   when: ansible_distribution in ['Debian', 'Ubuntu']
 
-- name: Ensure UFW is installed
-  apt:
+- name: Ensure UFW is installed (for Debian, Ubuntu)
+  ansible.builtin.apt:
     name: ufw
     state: present
   when: ansible_distribution in ['Debian', 'Ubuntu']
 
-- name: Allow ports through UFW
-  ufw:
+- name: Allow ports through UFW (for Debian, Ubuntu)
+  community.general.ufw:
     rule: allow
     port: "{{ item }}"
     proto: tcp
   loop: "{{ firewall_allowed_ports }}"
-  when: ansible_distribution in ['Debian', 'Ubuntu']
+  when:
+    - ansible_distribution in ['Debian', 'Ubuntu']
+    - firewall_allowed_ports is defined and firewall_allowed_ports | length > 0
+  notify: Reload UFW
 
-- name: Enable UFW
-  ufw:
+- name: Enable UFW (for Debian, Ubuntu)
+  community.general.ufw:
     state: enabled
   when: ansible_distribution in ['Debian', 'Ubuntu']
+  notify: Reload UFW
 
-- name: Deny all other incoming connections through UFW
-  ufw:
+- name: Deny all other incoming connections through UFW (for Debian, Ubuntu)
+  community.general.ufw:
     default: deny
     direction: incoming
   when: ansible_distribution in ['Debian', 'Ubuntu']
+  notify: Reload UFW
 
-- name: Reload UFW to apply changes
-  command: ufw reload
-  when: ansible_distribution in ['Debian', 'Ubuntu']
-
-- name: Start and enable UFW service
-  service:
+- name: Start and enable UFW service (for Debian, Ubuntu)
+  ansible.builtin.service:
     name: ufw
     state: started
     enabled: true
   when: ansible_distribution in ['Debian', 'Ubuntu']
 
-- name: Ensure dnf cache is updated
+- name: Ensure dnf cache is updated (for Fedora)
   ansible.builtin.dnf:
     update_cache: true
   when: ansible_distribution in ['Fedora']
 
-- name: Ensure yum cache is updated
-  yum:
+- name: Ensure yum cache is updated (for CentOS, Rocky Linux, AlmaLinux)
+  ansible.builtin.yum: # noqa fqcn package-latest
     name: "*"
     state: latest
   when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
 
-- name: Ensure firewalld is installed
-  yum:
+- name: Ensure firewalld is installed (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.builtin.yum: # noqa fqcn
     name: firewalld
     state: present
   when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
 
-- name: Start and enable firewalld service
-  service:
+- name: Start and enable firewalld service (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.builtin.service:
     name: firewalld
     state: started
     enabled: true
   when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
 
-- name: Check if firewalld is active
-  command: systemctl is-active firewalld
+- name: Check if firewalld is active (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.builtin.command: systemctl is-active firewalld # noqa command-instead-of-module
   register: firewalld_status
   retries: 10 # Adjust as needed
   delay: 5 # Adjust as needed (in seconds)
   until: firewalld_status.stdout == "active"
   when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+  changed_when: false
 
-- name: Allow ports through firewalld
-  firewalld:
+- name: Allow ports through firewalld (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.posix.firewalld:
     port: "{{ item }}/tcp"
     permanent: true
     state: enabled
     immediate: true
   loop: "{{ firewall_allowed_ports }}"
-  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+  when:
+    - ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+    - firewall_allowed_ports is defined and firewall_allowed_ports | length > 0
+  notify: Reload firewalld
 
-- name: Deny all other incoming connections through firewalld
-  firewalld:
+- name: Deny all other incoming connections through firewalld (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.posix.firewalld:
     zone: public
     source: 0.0.0.0/0
     permanent: true
     state: disabled
     immediate: true
   when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+  notify: Reload firewalld
 
-- name: Reload firewalld to apply changes
-  firewalld:
+- name: Reload firewalld to apply changes (for Fedora, CentOS, Rocky Linux, AlmaLinux)
+  ansible.posix.firewalld:
     state: enabled
   when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
