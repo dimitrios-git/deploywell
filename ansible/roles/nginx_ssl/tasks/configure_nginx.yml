@@ -1,14 +1,6 @@
 ---
 # tasks file for nginx_ssl
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-- name: Ensure SSL configuration directory exists for {{ item }}
-=======
 - name: Ensure SSL configuration directory exists
->>>>>>> Stashed changes
-=======
-- name: Ensure SSL configuration directory exists
->>>>>>> Stashed changes
   ansible.builtin.file:
     path: "/etc/nginx/ssl/{{ item }}"
     state: directory
@@ -17,15 +9,7 @@
     mode: "0755"
   loop: "{{ nginx_ssl_domains }}"
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-- name: Template HTTPS server block configuration for {{ item.server_name }}
-=======
 - name: Template HTTPS server block configuration
->>>>>>> Stashed changes
-=======
-- name: Template HTTPS server block configuration
->>>>>>> Stashed changes
   ansible.builtin.template:
     src: nginx_proxy_ssl_conf.j2
     dest: "/etc/nginx/sites-available/{{ item.server_name }}"
@@ -37,15 +21,7 @@
   notify:
     - Restart Nginx
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-- name: Enable Nginx SSL site for {{ item.server_name }}
-=======
 - name: Enable Nginx SSL site
->>>>>>> Stashed changes
-=======
-- name: Enable Nginx SSL site
->>>>>>> Stashed changes
   ansible.builtin.file:
     src: "/etc/nginx/sites-available/{{ item.server_name }}"
     dest: "/etc/nginx/sites-enabled/{{ item.server_name }}"

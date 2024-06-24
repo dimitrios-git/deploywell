@@ -1,14 +1,6 @@
 galaxy_info:
   author: Dimitrios Charalampidis
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  description: Generate SSL certificates for Nginx
-=======
   description: Generate SSL certificates and configure Nginx accordingly
->>>>>>> Stashed changes
-=======
-  description: Generate SSL certificates and configure Nginx accordingly
->>>>>>> Stashed changes
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value

@@ -1,18 +1,26 @@
 ---
 # tasks file for nginx
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Ensure dnf cache is updated
+  ansible.builtin.dnf:
+    update_cache: true
+  when: ansible_distribution in ['Fedora']
+
+- name: Ensure yum cache is updated
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+  when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
+
 - name: Install Nginx package
   ansible.builtin.package:
     name: nginx
     state: present
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    update_cache: true # Update cache to ensure latest version is installed
-=======
     update_cache: true
->>>>>>> Stashed changes
-=======
-    update_cache: true
->>>>>>> Stashed changes
 
 - name: Ensure Nginx service is started and enabled
   ansible.builtin.service:

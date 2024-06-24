@@ -1,6 +1,6 @@
 # Role Name
 
-## Docker
+## Firewall
 
 This role installs and configures UFW on Debian-based systems and firewalld on RedHat-based systems.
 

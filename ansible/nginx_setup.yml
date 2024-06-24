@@ -1,26 +1,5 @@
-# Description: This playbook sets up Nginx with SSL and reverse proxy.
-# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff nginx_setup.yml --limiit=<host>
-# Author: Dimitrios Chralampidis (dimitrios@charalampidis.pro)
-# Tested on:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-#   - Ubuntu 24.04 LTS
-#   - Debian 12
-=======
-#   - Debian 12
-=======
-#   - Debian 12
->>>>>>> Stashed changes
-#   - Ubuntu 24.04 LTS
-#   - Fedora 40
-#   - CentOS Stream 9
-#   - Rocky Linux 9
-#   - AlmaLinux 9
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 ---
+# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff nginx_setup.yml --limiit=<host>
 - name: Nginx Setup
   hosts: all
   become: true

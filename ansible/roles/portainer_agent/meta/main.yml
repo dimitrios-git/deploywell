@@ -1,14 +1,6 @@
 galaxy_info:
   author: Dimitrios Charalampidis
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  description: Install and configure Portainer Agent
-=======
   description: Install and configure Portainer Agent for standalone Docker hosts
->>>>>>> Stashed changes
-=======
-  description: Install and configure Portainer Agent for standalone Docker hosts
->>>>>>> Stashed changes
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
