@@ -1,12 +1,18 @@
 ---
 # ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff draft.yml --limiit=<host>
-- name: Update Remote System
+- name: Update remote system(s)
   import_playbook: "system_update.yml"
 
-- name: Reboot Remote System
+- name: Reboot remote system
   import_playbook: "system_reboot.yml"
 
-- name: Configure a Firewall and Install Docker
+- name: Install Docker
+  hosts: all
+  become: true
+  roles:
+    - docker
+
+- name: Install Nginx and configure firewall for Nginx
   hosts: all
   become: true
   roles:
@@ -15,5 +21,4 @@
         firewall_allowed_ports:
           - 22 # Don't lock yourself out
           - 80
-          - 443
-    - role: docker
+    - role: nginx
