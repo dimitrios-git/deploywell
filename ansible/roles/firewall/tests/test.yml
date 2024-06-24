@@ -8,7 +8,7 @@
 # vagrant ssh
 #
 # Then run the following command to see the version of Docker installed:
-# docker --version
+# ufw status
 #
 # If you run into any issues, adjust the network device and the IP address in the Vagrantfile and the inventory file.
 #
@@ -21,9 +21,12 @@
 # When you are done, you can run the following command to destroy the VM:
 # vagrant destroy
 ---
-# tests file for docker
-- name: Set up Docker
-  hosts: vagrant
+- hosts: vagrant
   become: true
   roles:
-    - docker
+    - role: firewall
+      vars:
+        firewall_allowed_ports:
+          - 22 # Don't lock yourself out
+          - 80
+          - 443

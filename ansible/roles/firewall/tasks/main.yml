@@ -1,0 +1,97 @@
+---
+# tasks file for firewall
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Ensure UFW is installed
+  apt:
+    name: ufw
+    state: present
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Allow ports through UFW
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ firewall_allowed_ports }}"
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Deny all other incoming connections through UFW
+  ufw:
+    default: deny
+    direction: incoming
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Reload UFW to apply changes
+  command: ufw reload
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Start and enable UFW service
+  service:
+    name: ufw
+    state: started
+    enabled: true
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Ensure dnf cache is updated
+  ansible.builtin.dnf:
+    update_cache: true
+  when: ansible_distribution in ['Fedora']
+
+- name: Ensure yum cache is updated
+  yum:
+    name: "*"
+    state: latest
+  when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Ensure firewalld is installed
+  yum:
+    name: firewalld
+    state: present
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Start and enable firewalld service
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Check if firewalld is active
+  command: systemctl is-active firewalld
+  register: firewalld_status
+  retries: 10 # Adjust as needed
+  delay: 5 # Adjust as needed (in seconds)
+  until: firewalld_status.stdout == "active"
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Allow ports through firewalld
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ firewall_allowed_ports }}"
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Deny all other incoming connections through firewalld
+  firewalld:
+    zone: public
+    source: 0.0.0.0/0
+    permanent: true
+    state: disabled
+    immediate: true
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Reload firewalld to apply changes
+  firewalld:
+    state: enabled
+  when: ansible_distribution in ['Fedora', 'CentOS', 'Rocky', 'AlmaLinux']

@@ -2,7 +2,7 @@
 # meta for docker
 galaxy_info:
   author: Dimitrios Charalampidis
-  description: Install Docker on Ubuntu, Debian, Fedora, CentOS, Rocky Linux, AlmaLinux
+  description: Install Docker
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value

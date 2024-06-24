@@ -1,7 +1,12 @@
+# ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff docker_setup.yml --limiit=<host>
 ---
 # run the following playbooks, portainer_agent_setup.yml and nginx_setup.yml
-- name: Import Portainer Agent Setup
-  import_playbook: ./portainer_agent_setup.yml
-
-- name: Import Nginx Setup
-  import_playbook: ./nginx_setup.yml
+- hosts: all
+  become: true
+  roles:
+    - role: firewall
+      vars:
+        firewall_allowed_ports:
+          - 22 # Don't lock yourself out
+          - 80
+          - 443
