@@ -7,7 +7,7 @@ This role installs Docker on Debian- and RedHat-based systems. Additionally, it 
 ### Tested on
 
 - Debian 12
-- Ubuntu 24.04 LTS
+- Ubuntu 24.04 LTS, 22.04 LTS, 20.04 LTS
 - Fedora 40
 - CentOS Stream 9
 - Rocky Linux 9

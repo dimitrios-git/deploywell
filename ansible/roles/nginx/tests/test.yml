@@ -10,7 +10,7 @@
 # vagrant ssh
 #
 # Then run the following command to see the version of Nginx installed:
-# nginx -v
+# nginx -T
 #
 # If you run into any issues, adjust the network device and the IP address in the Vagrantfile and the inventory file.
 #
@@ -24,13 +24,23 @@
 # vagrant destroy -f
 #
 # tests file for nginx
-- name: Test Nginx Installation on a Vagrant VM
+- name: Test Nginx installation on a Vagrant VM
   hosts: vagrant
   become: true
 
   vars:
-    nginx_root_enabled: true # Set to true or false based on your requirement
-    nginx_root_domain: example.com # Main Nginx domain name
+    nginx_proxy_configs:
+      - server_name: example.com
+        upstream: 127.0.0.1:8080
+        ssl: disabled
+        ssl_email: webmaster@example.com
+      - server_name: app1.example.com
+        upstream: 127.0.0.1:8081
+        ssl: disabled
+        ssl_email: webmaster@example.com
+      - server_name: app2.example.com
+        upstream: 127.0.0.1:8082
+        ssl: disabled
 
   tasks:
     - name: Include nginx role

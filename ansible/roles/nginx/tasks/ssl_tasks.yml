@@ -33,6 +33,7 @@
     --agree-tos
     --non-interactive
     --standalone
+    --staging
   environment:
     PATH: "{{ ansible_env.PATH }}"
   args:

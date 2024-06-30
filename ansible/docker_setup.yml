@@ -1,7 +1,0 @@
----
-# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff docker_setup.yml --limiit=<host>
-- name: Set up Docker
-  hosts: all
-  become: true
-  roles:
-    - docker

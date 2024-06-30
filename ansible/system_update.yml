@@ -1,40 +1,36 @@
 ---
-# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff system_update.yml --limiit=<host>
-- name: System Update
-  hosts: all
-  become: true
-  tasks:
-    - name: Update apt cache and upgrade all packages (for Debian, Ubuntu)
-      ansible.builtin.apt:
-        update_cache: true
-        upgrade: dist
-      when: ansible_distribution in ['Debian', 'Ubuntu']
+# Tasks for updaing all packages on the system by importing this file into another playbook
+- name: Update apt cache and upgrade all packages (for Debian, Ubuntu)
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+  when: ansible_distribution in ['Debian', 'Ubuntu']
 
-    - name: Autoremove leaf packages (for Debian, Ubuntu)
-      ansible.builtin.apt:
-        autoremove: true
-      when: ansible_distribution in ['Debian', 'Ubuntu']
+- name: Autoremove leaf packages (for Debian, Ubuntu)
+  ansible.builtin.apt:
+    autoremove: true
+  when: ansible_distribution in ['Debian', 'Ubuntu']
 
-    - name: Update dnf cache and upgrade all packages (for Fedora)
-      ansible.builtin.dnf:
-        name: "*"
-        state: present
-        update_cache: true
-      when: ansible_distribution == 'Fedora'
+- name: Update dnf cache and upgrade all packages (for Fedora)
+  ansible.builtin.dnf:
+    name: "*"
+    state: present
+    update_cache: true
+  when: ansible_distribution == 'Fedora'
 
-    - name: Autoremove leaf packages (for Fedora)
-      ansible.builtin.dnf:
-        autoremove: true
-      when: ansible_distribution == 'Fedora'
+- name: Autoremove leaf packages (for Fedora)
+  ansible.builtin.dnf:
+    autoremove: true
+  when: ansible_distribution == 'Fedora'
 
-    - name: Update yum cache and upgrade all packagest (for CentOS, Rocky Linux, AlmaLinux)
-      ansible.builtin.yum: # noqa fqcn package-latest
-        name: "*"
-        state: latest
-        update_cache: true
-      when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
+- name: Update yum cache and upgrade all packagest (for CentOS, Rocky Linux, AlmaLinux)
+  ansible.builtin.yum: # noqa fqcn package-latest
+    name: "*"
+    state: latest
+    update_cache: true
+  when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
 
-    - name: Autoremove leaf packages (for CentOS, Rocky Linux, AlmaLinux)
-      ansible.builtin.yum: # noqa fqcn
-        autoremove: true
-      when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
+- name: Autoremove leaf packages (for CentOS, Rocky Linux, AlmaLinux)
+  ansible.builtin.yum: # noqa fqcn
+    autoremove: true
+  when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']

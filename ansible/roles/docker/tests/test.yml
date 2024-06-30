@@ -24,7 +24,7 @@
 # vagrant destroy -f
 #
 # tests file for docker
-- name: Test Setting up Docker
+- name: Test Setting up Docker on a Vagrant VM
   hosts: vagrant
   become: true
   roles:

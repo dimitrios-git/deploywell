@@ -1,5 +1,16 @@
 ---
-# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff docker_swarm_play.yml --limiit=<host>
+# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff docker_swarm_1_play.yml --limiit=<host>
+- name: Upgrade all packages
+  hosts: playground
+  become: true
+  tasks:
+    - name: Include system update tasks
+      ansible.builtin.include_tasks:
+        file: system_update.yml
+    - name: Include system reboot tasks
+      ansible.builtin.include_tasks:
+        file: system_reboot.yml
+
 - name: Setup Docker Swarm
   hosts: docker_swarm_1
   become: true
@@ -73,7 +84,7 @@
         name: firewall
 
 - name: Install Nginx and configure firewall for Nginx and Portainer
-  hosts: webserver
+  hosts: docker_swarm_1_webserver
   become: true
   vars:
     firewall_allowed_ports:
@@ -97,7 +108,7 @@
         name: nginx
 
 - name: Install jsondiff Python package (for building the Portainer stack)
-  hosts: webserver
+  hosts: docker_swarm_1_webserver
   become: true
   tasks:
     - name: Install jsondiff package using apt
@@ -106,7 +117,7 @@
         state: present
 
 - name: Create Docker secrets for SSL certificates from Nginx
-  hosts: webserver
+  hosts: docker_swarm_1_webserver
   become: true
   vars:
     portainer_proxy: portainer.snail-trading.com
@@ -143,7 +154,7 @@
       changed_when: sslkey_secret.rc == 0
 
 - name: Download and deploy Portainer stack YAML
-  hosts: docker_swarm_1_managers
+  hosts: docker_swarm_1_webserver
   become: true
   vars:
     portainer_version: "ce2-20"
