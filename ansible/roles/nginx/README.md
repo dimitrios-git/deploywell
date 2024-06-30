@@ -2,7 +2,7 @@
 
 ## Nginx
 
-This role installs the Nginx web server on Debian-based systems and firewalld on RedHat-based systems.
+This role installs the Nginx web server on Debian- and RedHat-based systems.
 
 ### Tested on
 
@@ -30,11 +30,18 @@ None.
 Change `all` to your target host, or use `--limit=<your-target-host>`:
 
     ---
-    - name: Set up Nginx
+    - name: Install Nginx
       hosts: all
       become: true
-      roles:
-        - role: nginx
+
+      vars:
+        nginx_main_domain: example.com # Main Nginx domain name
+        nginx_main_enabled: true # Set to true or false based on your requirement
+
+      tasks:
+      - name: Include nginx role
+        ansible.builtin.include_role:
+          name: nginx
 
 ## License
 

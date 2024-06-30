@@ -1,0 +1,108 @@
+---
+# Install Certbot
+- name: Install EPEL repository
+  ansible.builtin.yum: # noqa fqcn
+    name: epel-release
+    state: present
+  when: ansible_distribution in ["CentOS", "Rocky", "AlmaLinux"]
+
+- name: Install Certbot
+  ansible.builtin.package:
+    name: certbot
+    state: present
+    update_cache: true
+
+# Obtain SSL certificates
+- name: Ensure temporary directory exists for Certbot
+  ansible.builtin.file:
+    path: /tmp/certbot
+    state: directory
+    mode: "0755"
+
+- name: Stop Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: stopped
+
+# Add --staging for testing purposes
+- name: Obtain SSL certificates with Certbot using standalone
+  ansible.builtin.command: >
+    certbot certonly
+    -d {{ item.server_name }}
+    --email {{ item.ssl_email | default('admin@example.com') }}
+    --agree-tos
+    --non-interactive
+    --standalone
+  environment:
+    PATH: "{{ ansible_env.PATH }}"
+  args:
+    creates: "/etc/letsencrypt/live/{{ item.server_name }}/fullchain.pem"
+  register: certbot_results
+  loop: "{{ nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') }}"
+  loop_control:
+    loop_var: item
+
+# - name: Debug Certbot results
+#   ansible.builtin.debug:
+#     var: certbot_results
+
+- name: Ensure SSL destination directories exist
+  ansible.builtin.file:
+    path: "/etc/nginx/ssl/{{ item.server_name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') }}"
+  loop_control:
+    loop_var: item
+
+- name: Find latest certificate directory
+  ansible.builtin.command: >
+    sh -c 'ls -td /etc/letsencrypt/live/{{ item.server_name }}*-*/ /etc/letsencrypt/live/{{ item.server_name }}/ 2>/dev/null | head -n 1'
+  register: latest_cert_directory
+  loop: "{{ nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') }}"
+  loop_control:
+    loop_var: item
+  changed_when: false
+
+# - name: Debug latest certificate directory
+#   ansible.builtin.debug:
+#     msg: "{{ latest_cert_directory }}"
+
+- name: Copy SSL fullchain keys to Nginx configuration directory
+  ansible.builtin.copy:
+    src: "{{ item.stdout }}/fullchain.pem"
+    dest: "/etc/nginx/ssl/{{ item.item.server_name }}/fullchain.pem"
+    mode: "0644"
+    remote_src: true
+  loop: "{{ latest_cert_directory.results }}"
+  loop_control:
+    loop_var: item
+  failed_when: item.rc != 0
+
+- name: Copy SSL private keys to Nginx configuration directory
+  ansible.builtin.copy:
+    src: "{{ item.stdout }}/privkey.pem"
+    dest: "/etc/nginx/ssl/{{ item.item.server_name }}/privkey.pem"
+    mode: "0600"
+    remote_src: true
+  loop: "{{ latest_cert_directory.results }}"
+  loop_control:
+    loop_var: item
+  failed_when: item.rc != 0
+
+# Configure Nginx for SSL
+- name: Ensure SSL configuration directory exists
+  ansible.builtin.file:
+    path: "/etc/nginx/ssl/{{ item.server_name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') }}"
+  loop_control:
+    loop_var: item
+
+- name: Start Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started

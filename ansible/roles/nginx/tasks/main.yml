@@ -1,5 +1,4 @@
 ---
-# tasks file for nginx
 - name: Ensure apt cache is updated
   ansible.builtin.apt:
     update_cache: true
@@ -27,3 +26,76 @@
     name: nginx
     state: started
     enabled: true
+
+- name: Ensure conf.d directory exists
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d
+    state: directory
+    mode: "0755"
+
+- name: Ensure sites-available directory exists
+  ansible.builtin.file:
+    path: /etc/nginx/sites-available
+    state: directory
+    mode: "0755"
+
+- name: Ensure sites-enabled directory exists
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+    mode: "0755"
+
+- name: Remove default site configuration
+  ansible.builtin.file:
+    path: /etc/nginx/sites-available/default
+    state: absent
+  notify:
+    - Restart Nginx
+
+- name: Remove default site enabled symlink
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify:
+    - Restart Nginx
+
+# Handle proxy configurations
+- name: Template for creating Nginx proxy configuration
+  ansible.builtin.template:
+    src: nginx_proxy_conf.j2
+    dest: /etc/nginx/sites-available/{{ item.server_name }}
+    mode: "0644"
+  notify:
+    - Restart Nginx
+  with_items: "{{ nginx_proxy_configs }}"
+  loop_control:
+    loop_var: item
+
+- name: Enable Nginx site
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ item.server_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ item.server_name }}"
+    state: link
+  with_items: "{{ nginx_proxy_configs }}"
+  loop_control:
+    loop_var: item
+  notify: Restart Nginx
+
+# Debug the ssl attribute in the proxy configs
+- name: Debug ssl attribute in proxy configs
+  ansible.builtin.debug:
+    msg: "Proxy {{ item.server_name }} has SSL enabled: {{ item.ssl }}"
+  with_items: "{{ nginx_proxy_configs }}"
+  loop_control:
+    loop_var: item
+
+# Debug SSL enabled condition
+- name: Debug SSL enabled condition
+  ansible.builtin.debug:
+    msg: "SSL is enabled for some proxies"
+  when: "'enabled' in (nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') | map(attribute='ssl') | list)"
+
+# Include SSL tasks conditionally
+- name: Install Certbot and obtain SSL certificates if any proxy has SSL enabled
+  ansible.builtin.include_tasks: ssl_tasks.yml
+  when: "'enabled' in (nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') | map(attribute='ssl') | list)"

@@ -27,7 +27,7 @@
         autoremove: true
       when: ansible_distribution == 'Fedora'
 
-    - name: Update yum cache and upgrade all packages (for CentOS, Rocky Linux, AlmaLinux)
+    - name: Update yum cache and upgrade all packagest (for CentOS, Rocky Linux, AlmaLinux)
       ansible.builtin.yum: # noqa fqcn package-latest
         name: "*"
         state: latest

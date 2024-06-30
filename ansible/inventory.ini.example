@@ -1,2 +1,5 @@
-[ubuntu_group_1]
-eu-central-1 ansible_host=192.168.1.1 ansible_user=root                                                                                                  
+1. Use `ansible-vault edit` to open your "inventory.ini" file and copy its content here, overwriting the existing content.
+2. Run `python inventory.ini.example_generator.py` to generate the anonymized "inventory.ini.example" file.
+
+For productivity reasons, I have included relevant tasks in .vscode/tasks.json file.
+Press `Ctrl+Shift+P` and type `Tasks: Run Task` to see the available tasks.

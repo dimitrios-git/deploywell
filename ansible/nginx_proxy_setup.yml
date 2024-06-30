@@ -1,0 +1,34 @@
+---
+# Usage: ansible-playbook -i inventory.ini --vault-password-file ansible_ssh_key.pub --diff nginx_proxy_setup.yml --limiit=<host>
+- name: Install Docker, Nginx with proxies and configure firewall for Nginx
+  hosts: all
+  become: true
+
+  vars:
+    firewall_allowed_ports:
+      - 22 # Don't lock yourself out
+      - 80 # HTTP
+      - 443 # HTTPS
+    nginx_root_enabled: true
+    nginx_root_domain: snail-trading.com
+    nginx_proxy_configs:
+      - server_name: app1.snail-trading.com
+        upstream: 127.0.0.1:8081
+        ssl: true
+      - server_name: app2.snail-trading.com
+        upstream: 127.0.0.1:8082
+        ssl: true
+
+  tasks:
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: docker
+    - name: Include firewall role
+      ansible.builtin.include_role:
+        name: firewall
+    - name: Include nginx role
+      ansible.builtin.include_role:
+        name: nginx
+    - name: Include nginx_proxy role
+      ansible.builtin.include_role:
+        name: nginx_proxy

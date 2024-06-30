@@ -27,5 +27,12 @@
 - name: Test Nginx Installation on a Vagrant VM
   hosts: vagrant
   become: true
-  roles:
-    - role: nginx
+
+  vars:
+    nginx_root_enabled: true # Set to true or false based on your requirement
+    nginx_root_domain: example.com # Main Nginx domain name
+
+  tasks:
+    - name: Include nginx role
+      ansible.builtin.include_role:
+        name: nginx
