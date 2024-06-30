@@ -3,6 +3,7 @@
 - name: Upgrade all packages
   hosts: playground
   become: true
+  tags: system_update
   tasks:
     - name: Include system update tasks
       ansible.builtin.include_tasks:
@@ -11,9 +12,25 @@
       ansible.builtin.include_tasks:
         file: system_reboot.yml
 
+- name: Configure a firewall for all nodes
+  hosts: docker_swarm_1
+  become: true
+  tags: firewall
+  vars:
+    firewall_allowed_ports:
+      - 22 # SSH - Don't lock yourself out
+      - 2377 # Docker Swarm
+      - 7946 # Docker Swarm
+      - 4789 # Docker Swarm
+  tasks:
+    - name: Include firewall role
+      ansible.builtin.include_role:
+        name: firewall
+
 - name: Setup Docker Swarm
   hosts: docker_swarm_1
   become: true
+  tags: docker_swarm
   tasks:
     - name: Check if Docker is installed
       ansible.builtin.command: docker --version
@@ -33,10 +50,10 @@
       changed_when: false
       when: inventory_hostname in groups['docker_swarm_1_managers']
 
-    - name: Debug swarm_init variable
-      ansible.builtin.debug:
-        var: swarm_init
-      when: inventory_hostname in groups['docker_swarm_1_managers']
+    # - name: Debug swarm_init variable
+    #   ansible.builtin.debug:
+    #     var: swarm_init
+    #   when: inventory_hostname in groups['docker_swarm_1_managers']
 
     - name: Retrieve join command for worker nodes
       ansible.builtin.command: docker swarm join-token worker -q
@@ -59,6 +76,7 @@
 - name: Join worker nodes to Docker Swarm
   hosts: docker_swarm_1_workers
   become: true
+  tags: docker_swarm
   tasks:
     - name: Join worker nodes to Docker Swarm
       ansible.builtin.command: >
@@ -72,20 +90,10 @@
     #   ansible.builtin.debug:
     #     var: join_swarm
 
-- name: Configure a firewall for all nodes
-  hosts: docker_swarm_1
-  become: true
-  vars:
-    firewall_allowed_ports:
-      - 22 # SSH - Don't lock yourself out
-  tasks:
-    - name: Include firewall role
-      ansible.builtin.include_role:
-        name: firewall
-
 - name: Install Nginx and configure firewall for Nginx and Portainer
   hosts: docker_swarm_1_webserver
   become: true
+  tags: nginx
   vars:
     firewall_allowed_ports:
       - 80 # HTTP
@@ -111,14 +119,15 @@
   hosts: docker_swarm_1_webserver
   become: true
   tasks:
-    - name: Install jsondiff package using apt
+    - name: Install jsondiff package
       ansible.builtin.package:
         name: python3-jsondiff
         state: present
 
-- name: Create Docker secrets for SSL certificates from Nginx
+- name: Verify Docker secrets
   hosts: docker_swarm_1_webserver
   become: true
+  tags: docker_secrets
   vars:
     portainer_proxy: portainer.snail-trading.com
   tasks:
@@ -134,28 +143,36 @@
     - name: Remove existing Docker secrets
       ansible.builtin.command: docker secret rm portainer.sslcert portainer.sslkey
       ignore_errors: true
-      register: remove_sslcert_secret
-      changed_when: remove_sslcert_secret.rc == 0
+      register: remove_secrets
+      changed_when: remove_secrets.rc == 0
 
     - name: Create Docker secret for SSL certificate
       ansible.builtin.command: docker secret create portainer.sslcert /etc/nginx/ssl/{{ portainer_proxy }}/fullchain.pem
+      ignore_errors: true
       register: sslcert_secret
       changed_when: sslcert_secret.rc == 0
 
-    - name: Remove existing Docker secret
-      ansible.builtin.command: docker secret rm portainer.sslkey
-      ignore_errors: true
-      register: remove_sslkey_secret
-      changed_when: remove_sslkey_secret.rc == 0
-
     - name: Create Docker secret for SSL key
       ansible.builtin.command: docker secret create portainer.sslkey /etc/nginx/ssl/{{ portainer_proxy }}/privkey.pem
+      ignore_errors: true
       register: sslkey_secret
       changed_when: sslkey_secret.rc == 0
+
+    - name: Verify Docker SSL secrets creation
+      ansible.builtin.command: docker secret ls
+      register: docker_secrets
+      changed_when: false
+
+    - name: Ensure Docker SSL secrets exist
+      ansible.builtin.assert:
+        that:
+          - "'portainer.sslcert' in docker_secrets.stdout"
+          - "'portainer.sslkey' in docker_secrets.stdout"
 
 - name: Download and deploy Portainer stack YAML
   hosts: docker_swarm_1_webserver
   become: true
+  tags: portainer
   vars:
     portainer_version: "ce2-20"
   tasks:
@@ -173,7 +190,26 @@
         mode: 644
       changed_when: false
 
-    - name: Deploy Portainer stack with SSL secrets
-      ansible.builtin.command: docker stack deploy --compose-file=/opt/portainer/portainer-agent-stack.yml portainer
+    - name: Deploy or update Portainer stack with SSL secrets
+      ansible.builtin.command: docker stack deploy --with-registry-auth --compose-file=/opt/portainer/portainer-agent-stack.yml portainer
       register: portainer_deploy
       changed_when: portainer_deploy.rc == 0
+      failed_when: portainer_deploy.rc != 0
+
+    # - name: Print Docker Compose file content
+    #   ansible.builtin.command: cat /opt/portainer/portainer-agent-stack.yml
+    #   register: compose_file_content
+    #   changed_when: false
+
+    # - name: Debug Docker Compose file
+    #   ansible.builtin.debug:
+    #     var: compose_file_content.stdout
+
+    # - name: List Docker secrets
+    #   ansible.builtin.command: docker secret ls
+    #   register: docker_secrets_list
+    #   changed_when: false
+
+    # - name: Debug Docker secrets
+    #   ansible.builtin.debug:
+    #     var: docker_secrets_list.stdout

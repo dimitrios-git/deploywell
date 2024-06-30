@@ -1,4 +1,11 @@
+{% if ansible_distribution in ['Debian', 'Ubuntu'] %}
 user www-data;
+{% elif ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux', 'Fedora'] %}
+user nginx;
+{% else %}
+# Default user if the distribution is not matched
+user www-data;
+{% endif %}
 worker_processes auto;
 error_log /var/log/nginx/error.log notice;
 pid /run/nginx.pid;

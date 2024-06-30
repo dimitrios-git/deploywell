@@ -59,10 +59,19 @@
   notify:
     - Restart Nginx
 
+# Handle Nginx main configuration
+- name: Template for creating Nginx main configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: "0644"
+  notify:
+    - Restart Nginx
+
 # Handle proxy configurations
 - name: Template for creating Nginx proxy configuration
   ansible.builtin.template:
-    src: nginx_proxy_conf.j2
+    src: nginx_proxy.conf.j2
     dest: /etc/nginx/sites-available/{{ item.server_name }}
     mode: "0644"
   notify:
@@ -81,19 +90,19 @@
     loop_var: item
   notify: Restart Nginx
 
-# Debug the ssl attribute in the proxy configs
-- name: Debug ssl attribute in proxy configs
-  ansible.builtin.debug:
-    msg: "Proxy {{ item.server_name }} has SSL enabled: {{ item.ssl }}"
-  with_items: "{{ nginx_proxy_configs }}"
-  loop_control:
-    loop_var: item
+# # Debug the ssl attribute in the proxy configs
+# - name: Debug ssl attribute in proxy configs
+#   ansible.builtin.debug:
+#     msg: "Proxy {{ item.server_name }} has SSL enabled: {{ item.ssl }}"
+#   with_items: "{{ nginx_proxy_configs }}"
+#   loop_control:
+#     loop_var: item
 
-# Debug SSL enabled condition
-- name: Debug SSL enabled condition
-  ansible.builtin.debug:
-    msg: "SSL is enabled for some proxies"
-  when: "'enabled' in (nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') | map(attribute='ssl') | list)"
+# # Debug SSL enabled condition
+# - name: Debug SSL enabled condition
+#   ansible.builtin.debug:
+#     msg: "SSL is enabled for some proxies"
+#   when: "'enabled' in (nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') | map(attribute='ssl') | list)"
 
 # Include SSL tasks conditionally
 - name: Install Certbot and obtain SSL certificates if any proxy has SSL enabled

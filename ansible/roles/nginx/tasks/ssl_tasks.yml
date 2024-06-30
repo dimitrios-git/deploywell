@@ -46,6 +46,11 @@
 # - name: Debug Certbot results
 #   ansible.builtin.debug:
 #     var: certbot_results
+- name: Ensure the SSL directory exists
+  ansible.builtin.file:
+    path: /etc/nginx/ssl
+    state: directory
+    mode: "0755"
 
 - name: Ensure SSL destination directories exist
   ansible.builtin.file:
@@ -90,18 +95,6 @@
   loop_control:
     loop_var: item
   failed_when: item.rc != 0
-
-# Configure Nginx for SSL
-- name: Ensure SSL configuration directory exists
-  ansible.builtin.file:
-    path: "/etc/nginx/ssl/{{ item.server_name }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  loop: "{{ nginx_proxy_configs | selectattr('ssl', 'equalto', 'enabled') }}"
-  loop_control:
-    loop_var: item
 
 - name: Start Nginx
   ansible.builtin.service:
