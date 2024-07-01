@@ -1,0 +1,43 @@
+---
+# tasks file for portainer
+# portainer/tasks/main.yml
+- name: Ensure Docker is installed
+  ansible.builtin.include_role:
+    name: docker
+
+- name: Install jsondiff Python package (for building the Portainer stack)
+  ansible.builtin.package:
+    name: python3-jsondiff
+    state: present
+
+- name: Ensure /opt/portainer directory exists
+  ansible.builtin.file:
+    path: /opt/portainer
+    state: directory
+    mode: "0755"
+
+- name: Include Docker secrets
+  ansible.builtin.include_tasks: docker-secrets.yml
+  when: portainer_mode == 'swarm-ssl'
+
+- name: Render the Portainer stack file from template
+  ansible.builtin.template:
+    src: "portainer-agent-stack-{{ portainer_mode }}.yml.j2"
+    dest: "/opt/portainer/portainer-agent-stack.yml"
+    mode: "0644"
+
+- name: Deploy or update Portainer stack in swarm mode
+  ansible.builtin.command: >
+    docker stack deploy --with-registry-auth --compose-file=/opt/portainer/portainer-agent-stack.yml portainer
+  register: portainer_deploy
+  changed_when: portainer_deploy.rc == 0
+  failed_when: portainer_deploy.rc != 0
+  when: portainer_mode in ['swarm', 'swarm-ssl']
+
+- name: Deploy or update Portainer in standalone mode
+  ansible.builtin.command: >
+    docker-compose -f /opt/portainer/portainer-agent-stack.yml up -d
+  register: portainer_deploy
+  changed_when: portainer_deploy.rc == 0
+  failed_when: portainer_deploy.rc != 0
+  when: portainer_mode == 'standalone'

@@ -37,15 +37,18 @@ Change `all` to your target host, or use `--limit=<your-target-host>`:
       vars:
         nginx_proxy_configs:
           - server_name: example.com
-            upstream: 127.0.0.1:8080
+            upstreams:
+              - 127.0.0.1:8080
             ssl: enabled
             ssl_email: webmaster@example.com
           - server_name: app1.example.com
-            upstream: 127.0.0.1:8081
+            upstreams:
+              - 127.0.0.1:8081
             ssl: enabled
             ssl_email: webmaster@example.com
           - server_name: app2.example.com
-            upstream: 127.0.0.1:8082
+            upstreams:
+              - 127.0.0.1:8082
             ssl: disabled
 
       tasks:

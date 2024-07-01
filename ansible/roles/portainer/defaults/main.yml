@@ -1,0 +1,5 @@
+---
+# defaults file for portainer
+portainer_mode: swarm
+portainer_version: "latest"
+portainer_proxy: "portainer.example.com"

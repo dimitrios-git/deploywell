@@ -1,0 +1,9 @@
+version: "3.2"
+
+services:
+  demo_webserver:
+    image: nginx
+    ports:
+      - "8080:80"
+    deploy:
+      mode: global

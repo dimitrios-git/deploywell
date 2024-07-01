@@ -1,0 +1,21 @@
+---
+# Tasks for shutting down the system by importing this file into another playbook
+- name: Check system uptime before shutdown
+  ansible.builtin.command: uptime
+  register: pre_shutdown_uptime
+  changed_when: false
+
+- name: Display system uptime before shutdown
+  ansible.builtin.debug:
+    msg: "System uptime before shutdown: {{ pre_shutdown_uptime.stdout }}"
+
+- name: Shut down the system
+  ansible.builtin.command: shutdown now
+  async: 1
+  poll: 0
+  failed_when: false
+  changed_when: false
+
+- name: Wait for system to shut down
+  ansible.builtin.pause:
+    prompt: "The shutdown command has been issued. Please wait for the system to shut down."
